@@ -1,9 +1,16 @@
 use axum::{ routing::{ delete, get, patch, post, put }, Router };
 
+use crate::db::{ connection_pool, migration::migrate_db };
+
 mod handlers;
+mod db;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    migrate_db()?;
+
+    let db_coon_pool = connection_pool()?;
+    let mut connection = db_coon_pool.get()?;
     let router = Router::new()
         .route("/todo", get(handlers::todo::list::handler))
         .route("/todo/{id}", get(handlers::todo::get::handler))

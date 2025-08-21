@@ -1,0 +1,13 @@
+
+services:
+
+  db:
+    image: mysql
+    restart: always
+    ports: 
+    - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_USER: todo
+      MYSQL_PASSWORD: todo
+      MYSQL_DATABASE: todo_api
