@@ -1,15 +1,19 @@
-use axum::{ http::StatusCode, Json };
+use std::sync::Arc;
 
-use crate::handlers::todo::models::{ CreateTodoRequest, Todo };
+use axum::{ extract::State, http::StatusCode, Json };
 
-pub async fn handler(Json(request): Json<CreateTodoRequest>) -> (StatusCode, Json<Todo>) {
+use crate::{ handlers::todo::models::{ CreateTodoRequest, Todo }, service::todo::Service };
+
+pub async fn handler(
+    State(todo_service): State<Arc<Service>>,
+    Json(request): Json<CreateTodoRequest>
+) -> Result<Json<Todo>, StatusCode> {
     println!("Create TODO request: {request:?}");
-    (
-        StatusCode::OK,
-        Json(Todo {
-            id: 0,
-            title: "Some title".to_string(),
-            description: "Some description".to_string(),
-        }),
-    )
+
+    let result = todo_service.create(request.into()).map_err(|error| {
+        println!("Error during creation of TODO: {}", error);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    Ok(Json(result.into()))
 }
