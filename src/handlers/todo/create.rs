@@ -1,12 +1,15 @@
 use std::sync::Arc;
 
-use axum::{ extract::State, http::StatusCode, Json };
+use axum::{Json, extract::State, http::StatusCode};
 
-use crate::{ handlers::todo::models::{ CreateTodoRequest, Todo }, service::todo::Service };
+use crate::{
+    handlers::todo::models::{CreateTodoRequest, Todo},
+    service::todo::Service,
+};
 
 pub async fn handler(
     State(todo_service): State<Arc<Service>>,
-    Json(request): Json<CreateTodoRequest>
+    Json(request): Json<CreateTodoRequest>,
 ) -> Result<Json<Todo>, StatusCode> {
     println!("Create TODO request: {request:?}");
 

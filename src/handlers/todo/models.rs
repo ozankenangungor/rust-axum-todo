@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::db::models::{ CreateTodo, TodoModel };
+use crate::db::models::{CreateTodo, TodoModel};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Todo {
@@ -15,6 +15,16 @@ impl From<TodoModel> for Todo {
             id: model.id as u64,
             title: model.title,
             description: model.description,
+        }
+    }
+}
+
+impl From<&TodoModel> for Todo {
+    fn from(model: &TodoModel) -> Self {
+        Self {
+            id: model.id as u64,
+            title: model.title.clone(),
+            description: model.description.clone(),
         }
     }
 }

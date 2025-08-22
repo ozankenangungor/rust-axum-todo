@@ -1,11 +1,14 @@
 use std::sync::Arc;
 
-use axum::{ routing::{ delete, get, patch, post, put }, Router };
+use axum::{
+    Router,
+    routing::{delete, get, patch, post, put},
+};
 
-use crate::db::{ migration::migrate_db };
+use crate::db::migration::migrate_db;
 
-mod handlers;
 mod db;
+mod handlers;
 mod service;
 
 #[tokio::main]

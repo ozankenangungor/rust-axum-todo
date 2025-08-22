@@ -1,16 +1,23 @@
-use axum::{ http::StatusCode, Json };
+use std::sync::Arc;
 
-use crate::handlers::todo::models::Todo;
+use axum::{Json, extract::State, http::StatusCode};
 
-pub async fn handler() -> (StatusCode, Json<Vec<Todo>>) {
-    (
-        StatusCode::OK,
-        Json(
-            vec![Todo {
-                id: 0,
-                title: "Some title".to_string(),
-                description: "Some description".to_string(),
-            }]
-        ),
-    )
+use crate::{handlers::todo::models::Todo, service::todo::Service};
+
+pub async fn handler(
+    State(todo_service): State<Arc<Service>>,
+) -> Result<Json<Vec<Todo>>, StatusCode> {
+    let result = todo_service.list().map_err(|error| {
+        println!("Failed to fetch the list of TODOs:  {}", error);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+    Ok(Json(
+        result
+            .iter()
+            .map(|value| {
+                let result: Todo = value.into();
+                result
+            })
+            .collect(),
+    ))
 }

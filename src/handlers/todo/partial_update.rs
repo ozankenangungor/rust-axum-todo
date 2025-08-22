@@ -1,6 +1,6 @@
-use axum::{ http::StatusCode, Json };
+use axum::{Json, http::StatusCode};
 
-use crate::handlers::todo::models::{ PartialUpdateTodoRequest, Todo };
+use crate::handlers::todo::models::{PartialUpdateTodoRequest, Todo};
 
 pub async fn handler(Json(request): Json<PartialUpdateTodoRequest>) -> (StatusCode, Json<Todo>) {
     println!("Partial update TODO request: {request:?}");
