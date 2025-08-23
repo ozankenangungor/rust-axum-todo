@@ -7,8 +7,10 @@ use axum::{
 
 use crate::db::migration::migrate_db;
 
-mod db;
 mod handlers;
+
+mod db;
+
 mod service;
 
 #[tokio::main]

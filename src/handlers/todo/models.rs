@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::db::models::{CreateTodo, TodoModel};
+use crate::db::models::{CreateTodo, TodoModel, UpdateTodo, UpdateTodoPartial};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Todo {
@@ -50,8 +50,26 @@ pub struct PartialUpdateTodoRequest {
     pub description: Option<String>,
 }
 
+impl From<PartialUpdateTodoRequest> for UpdateTodoPartial {
+    fn from(value: PartialUpdateTodoRequest) -> Self {
+        Self {
+            title: value.title,
+            description: value.description,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateTodoRequest {
     pub title: String,
     pub description: String,
+}
+
+impl From<UpdateTodoRequest> for UpdateTodo {
+    fn from(value: UpdateTodoRequest) -> Self {
+        Self {
+            title: value.title,
+            description: value.description,
+        }
+    }
 }

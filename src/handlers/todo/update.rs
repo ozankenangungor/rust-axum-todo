@@ -1,15 +1,36 @@
-use axum::{ http::StatusCode, Json };
+use std::sync::Arc;
 
-use crate::handlers::todo::models::{ UpdateTodoRequest, Todo };
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
+use diesel::IntoSql;
 
-pub async fn handler(Json(request): Json<UpdateTodoRequest>) -> (StatusCode, Json<Todo>) {
+use crate::{
+    handlers::todo::models::{Todo, UpdateTodoRequest},
+    service::{self, todo::Service},
+};
+
+pub async fn handler(
+    State(todo_service): State<Arc<Service>>,
+    Path(id): Path<u64>,
+    Json(request): Json<UpdateTodoRequest>,
+) -> Result<StatusCode, StatusCode> {
     println!("Update TODO request: {request:?}");
-    (
-        StatusCode::OK,
-        Json(Todo {
-            id: 0,
-            title: "Some title".to_string(),
-            description: "Some description".to_string(),
-        }),
-    )
+
+    let result = todo_service
+        .update(id as i32, request.into())
+        .map_err(|error| {
+            println!("Failed to do update: {error}");
+            if matches!(
+                error,
+                service::todo::Error::Diesel(diesel::result::Error::NotFound)
+            ) {
+                return StatusCode::NOT_FOUND;
+            }
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(StatusCode::OK)
 }
