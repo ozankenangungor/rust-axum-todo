@@ -1,15 +1,32 @@
-use axum::{ extract::Path, http::StatusCode, Json };
+use std::sync::Arc;
 
-use crate::handlers::todo::models::Todo;
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 
-pub async fn handler(Path(id): Path<u64>) -> (StatusCode, Json<Todo>) {
+use crate::{
+    handlers::todo::models::Todo,
+    service::{self, todo::Service},
+};
+
+pub async fn handler(
+    State(todo_service): State<Arc<Service>>,
+    Path(id): Path<u64>,
+) -> Result<Json<Todo>, StatusCode> {
     println!("Get TODO handler id: {id}");
-    (
-        StatusCode::OK,
-        Json(Todo {
-            id: 0,
-            title: "Some title".to_string(),
-            description: "Some description".to_string(),
-        }),
-    )
+
+    let result = todo_service.get(id as i32).map_err(|error| {
+        println!("Failed to retrieve TODO: {error}");
+        if matches!(
+            error,
+            service::todo::Error::Diesel(diesel::result::Error::NotFound)
+        ) {
+            return StatusCode::NOT_FOUND;
+        }
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    Ok(Json(result.into()))
 }

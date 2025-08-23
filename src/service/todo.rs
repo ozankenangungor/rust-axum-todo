@@ -5,7 +5,7 @@ use crate::db::{
 };
 use diesel::{
     Connection, ExpressionMethods, MysqlConnection, RunQueryDsl, SelectableHelper,
-    query_dsl::methods::{OrderDsl, SelectDsl},
+    query_dsl::methods::{FilterDsl, OrderDsl, SelectDsl},
     r2d2::{ConnectionManager, Pool},
 };
 use thiserror::Error;
@@ -51,6 +51,16 @@ impl Service {
         let result = schema::todos::table
             .select(TodoModel::as_select())
             .get_results(&mut conn)?;
+
+        Ok(result)
+    }
+
+    pub fn get(&self, id: i32) -> Result<TodoModel, Error> {
+        let mut conn = self.conn_pool.get()?;
+        let result = schema::todos::table
+            .select(TodoModel::as_select())
+            .filter(schema::todos::id.eq(id))
+            .first(&mut conn)?;
 
         Ok(result)
     }
